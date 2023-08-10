@@ -1,6 +1,4 @@
 # Bash scripts
----
-
 
 ## Scripts
 ### borg_backup.sh
