@@ -1,29 +1,28 @@
 # Bash scripts
 
 ## Scripts
-### borg_backup.sh
-Create backups with borgbackup
-#### Usage:
-```bash
-$ ./borg_backup.sh --help
-Usage:
-  ./borg_backup.sh [-ehpvV] [--env file] [--prune]
-
-Options:
-  -e, --env          Set borg_backup.env (required)
-  -h, --help         Display this help and exit
-  -p, --prune        Prune borg backups
-  -v, --verbose      Print debugging messages
-  -V, --version      Display the version number and exit
-
-Examples:
-  Create backup
-  $ ./borg_backup.sh --env borg_backup.env
-
-  Prune backups
-  $ ./borg_backup.sh --env borg_backup.env --prune
-```
-
+<table>
+  <thead>
+    <tr>
+      <th>Script</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="borg_backup.sh">borg_backup.md</a></td>
+      <td>Create backups with borgbackup</td>
+    </tr>
+    <tr>
+      <td><a href="docker-update-history.sh">docker-update-history.md</a></td>
+      <td>Show docker update history log</td>
+    </tr>
+    <tr>
+      <td><a href="docker-update.sh">docker-update.md</a></td>
+      <td>Update docker containers from docker-compose file</td>
+    </tr>
+  </tbody>
+</table>
 
 ## License
 See repository license file.
