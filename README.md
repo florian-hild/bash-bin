@@ -10,15 +10,15 @@
   </thead>
   <tbody>
     <tr>
-      <td><a href="borg_backup.sh">borg_backup.md</a></td>
+      <td><a href="borg_backup.md">borg_backup.sh</a></td>
       <td>Create backups with borgbackup</td>
     </tr>
     <tr>
-      <td><a href="docker-update-history.sh">docker-update-history.md</a></td>
+      <td><a href="docker-update-history.md">docker-update-history.sh</a></td>
       <td>Show docker update history log</td>
     </tr>
     <tr>
-      <td><a href="docker-update.sh">docker-update.md</a></td>
+      <td><a href="docker-update.md">docker-update.sh</a></td>
       <td>Update docker containers from docker-compose file</td>
     </tr>
   </tbody>
