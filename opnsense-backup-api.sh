@@ -45,6 +45,7 @@ EOF
 # get_backup_file()
 # Use curl to get opnsense backup xml file
 get_backup_file() {
+  log info "Get OPNsense config from \"https://${BACKUP_API_HOST}:${BACKUP_API_PORT}/api/core/backup/download/this\""
   # Set file permission to 0640
   umask 0137
 
@@ -56,12 +57,15 @@ get_backup_file() {
   local xz_cmd='/usr/bin/xz'
 
   if [[ -n "${encrypt// }" ]]; then
+    log info "Encrypt backupset"
     local openssl_cmd='/usr/bin/openssl'
     openssl_cmd+=' enc -e -base64 -aes-256-cbc -pbkdf2 -md sha512 -iter 100000'
     openssl_cmd+=" -pass pass:${BACKUP_ENCRYPTION_PASS}"
 
+    log info "Save compressed backupset \"${BACKUP_DESTINATION_PATH}/opnsense-backup-$(date +'%F_%H-%M')_encrypted.xml.xz\""
     ${curl_cmd} | ${openssl_cmd} | ${xz_cmd} > "${BACKUP_DESTINATION_PATH}/opnsense-backup-$(date +'%F_%H-%M')_encrypted.xml.xz"
   else
+    log info "Save compressed backupset \"${BACKUP_DESTINATION_PATH}/opnsense-backup-$(date +'%F_%H-%M').xml.xz\""
     ${curl_cmd} | ${xz_cmd} > "${BACKUP_DESTINATION_PATH}/opnsense-backup-$(date +'%F_%H-%M').xml.xz"
   fi
 
@@ -74,6 +78,7 @@ get_backup_file() {
 }
 
 purge_backup_files() {
+  log info "Deleting backups older then \"${BACKUP_DAYS_KEEP}\" days"
   /usr/bin/find ${BACKUP_DESTINATION_PATH} -name "opnsense-backup-*.xml.xz" -type f -mtime +${BACKUP_DAYS_KEEP} -delete
 }
 
@@ -181,4 +186,3 @@ get_backup_file
 purge_backup_files
 
 exit
-
