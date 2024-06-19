@@ -178,6 +178,7 @@ if [[ -n "${encrypt// }" ]] && [[ -z "${BACKUP_ENCRYPTION_PASS// }" ]]; then
 fi
 
 get_backup_file
+purge_backup_files
 
 exit
 
