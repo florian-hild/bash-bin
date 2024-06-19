@@ -45,6 +45,9 @@ EOF
 # get_backup_file()
 # Use curl to get opnsense backup xml file
 get_backup_file() {
+  # Set file permission to 0640
+  umask 0137
+
   local curl_cmd='/usr/bin/curl'
   curl_cmd+=' --silent --insecure'
   curl_cmd+=" --user ${BACKUP_API_KEY}:${BACKUP_API_SECRET}"
