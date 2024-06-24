@@ -54,7 +54,7 @@ get_backup_file() {
   curl_cmd+=" --user ${BACKUP_API_KEY}:${BACKUP_API_SECRET}"
   curl_cmd+=" https://${BACKUP_API_HOST}:${BACKUP_API_PORT}/api/core/backup/download/this"
 
-  local xz_cmd='/usr/bin/xz'
+  local gzip_cmd='/usr/bin/gzip'
 
   if [[ -n "${encrypt// }" ]]; then
     log info "Encrypt backupset"
@@ -62,11 +62,11 @@ get_backup_file() {
     openssl_cmd+=' enc -e -base64 -aes-256-cbc -pbkdf2 -md sha512 -iter 100000'
     openssl_cmd+=" -pass pass:${BACKUP_ENCRYPTION_PASS}"
 
-    log info "Save compressed backupset \"${BACKUP_DESTINATION_PATH}/opnsense-backup-$(date +'%F_%H-%M')_encrypted.xml.xz\""
-    ${curl_cmd} | ${openssl_cmd} | ${xz_cmd} > "${BACKUP_DESTINATION_PATH}/opnsense-backup-$(date +'%F_%H-%M')_encrypted.xml.xz"
+    log info "Save compressed backupset \"${BACKUP_DESTINATION_PATH}/opnsense-backup-$(date +'%F_%H-%M')_encrypted.xml.gz\""
+    ${curl_cmd} | ${openssl_cmd} | ${gzip_cmd} --stdout - > "${BACKUP_DESTINATION_PATH}/opnsense-backup-$(date +'%F_%H-%M')_encrypted.xml.gz"
   else
-    log info "Save compressed backupset \"${BACKUP_DESTINATION_PATH}/opnsense-backup-$(date +'%F_%H-%M').xml.xz\""
-    ${curl_cmd} | ${xz_cmd} > "${BACKUP_DESTINATION_PATH}/opnsense-backup-$(date +'%F_%H-%M').xml.xz"
+    log info "Save compressed backupset \"${BACKUP_DESTINATION_PATH}/opnsense-backup-$(date +'%F_%H-%M').xml.gz\""
+    ${curl_cmd} | ${gzip_cmd} --stdout - > "${BACKUP_DESTINATION_PATH}/opnsense-backup-$(date +'%F_%H-%M').xml.gz"
   fi
 
   exit_code=${PIPESTATUS[0]}
@@ -79,7 +79,7 @@ get_backup_file() {
 
 purge_backup_files() {
   log info "Deleting backups older then \"${BACKUP_DAYS_KEEP}\" days"
-  /usr/bin/find ${BACKUP_DESTINATION_PATH} -name "opnsense-backup-*.xml.xz" -type f -mtime +${BACKUP_DAYS_KEEP} -delete
+  /usr/bin/find ${BACKUP_DESTINATION_PATH} -name "opnsense-backup-*.xml.gz" -type f -mtime +${BACKUP_DAYS_KEEP} -delete
 }
 
 # main()
