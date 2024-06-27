@@ -7,7 +7,12 @@
 #-------------------------------------------------------------------------------
 
 export LANG=C
-declare -r __SCRIPT_VERSION__='1.0'
+declare -r __SCRIPT_VERSION__='2.0'
+
+if ! command -v jq &> /dev/null; then
+  echo "Command jq could not be found"
+  exit 1
+fi
 
 if [[ -z "${1// }" ]]; then
   echo "Usage:"
@@ -15,5 +20,9 @@ if [[ -z "${1// }" ]]; then
   exit 2
 fi
 
-cat "${1}" | jq '.timestamp + " | Status: " + .status + " | Loss: " + .loss'
-
+if [[ -r ${1} ]]; then
+  cat "${1}" | jq '.timestamp + " | Status: " + .status + " | Loss: " + .loss'
+else
+  echo "Error: File \"${1}\" not found or not readable"
+  exit 1
+fi
