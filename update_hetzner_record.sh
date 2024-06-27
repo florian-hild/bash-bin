@@ -7,23 +7,39 @@
 #-------------------------------------------------------------------------------
 
 export LANG=C
-declare -r __SCRIPT_VERSION__='2.0'
+declare -r __SCRIPT_VERSION__='3.0'
 declare -r BASH_LIB_DIR="/usr/local/bin/bash-lib"
+declare -r logfile_path="${HOME}/local/log"
 
 # Load libraries
 source ${BASH_LIB_DIR}/logger/lib
 declare -r log_no_timestamp="true"
 
-source update_hetzner_record.env
+if [[ ! -d ${logfile_path} ]]; then
+  mkdir -p ${logfile_path}
+fi
+
+if [[ -z "${1// }" ]]; then
+  echo "Usage:"
+  echo "  $0 [path to env file]"
+  exit 2
+fi
+
+if [[ -r ${1} ]]; then
+  source ${1}
+else
+  log "error" "File \"${1}\" not found or not readable"
+  exit 1
+fi
+
 # public_ip=$(ifconfig igb0 | grep -w 'inet' | cut -d' ' -f2)
-# public_ip=$(curl ipinfo.io/ip)
-current_public_ip=$(curl --silent --show-error https://ifconfig.me)
+current_public_ip=$(curl --silent --show-error https://ifconfig.me/ip)
 
 log "info" "Current public ip: \"${current_public_ip}\""
 log "info" "   Last public ip: \"${last_public_ip}\""
 
 if [[ "${current_public_ip}" != "${last_public_ip}" ]]; then
-  printf "{\"timestamp\":\"$(date +'%F %T')\",\"current\":\"${current_public_ip}\",\"last\":\"${last_public_ip}\"}\n" >> update_hetzner_record.jsonl
+  printf "{\"timestamp\":\"$(date +'%F %T')\",\"current\":\"${current_public_ip}\",\"last\":\"${last_public_ip}\"}\n" >> ${logfile_path}/update_hetzner_record.jsonl
 
 
   for record in "${record_ids[@]}"; do
@@ -42,7 +58,8 @@ if [[ "${current_public_ip}" != "${last_public_ip}" ]]; then
       }'
   done
 
-  perl -pi -e "s/^last_public_ip=.*/last_public_ip=\"${current_public_ip}\"/g" update_hetzner_record.env
+  # Replace last_public_ip value in env file
+  perl -pi -e "s/^last_public_ip=.*/last_public_ip=\"${current_public_ip}\"/g" ${1}
 fi
 
 exit
