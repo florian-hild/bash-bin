@@ -25,14 +25,13 @@ if [[ ! -d ${logfile_path} ]]; then
   mkdir -p ${logfile_path}
 fi
 
-if ! ping -q -c4 -i1.0 -W40 9.9.9.9 > /dev/null; then
-  log "error" "Ping check to \"9.9.9.9\" unsuccessful"
-  ${pluginctl_cmd} -r return_gateways_status | jq -c '.dpinger.[]' | while read gw; do
-    log "info" "Check Gateway status for \"$(echo "${gw}" | jq -r '.name')\""
-    log "info" "Gateway status: \"$(echo "${gw}" | jq -r '.status')\""
-    echo "${gw}" |sed "s/{/{\"timestamp\":\"$(date +'%F %T')\",/" | jq -c >> ${logfile_path}/check_gw_$(echo "${gw}" | jq -r '.name').jsonl
-  done
-else
-  log "info" "Ping check to \"9.9.9.9\" successful"
-fi
+${pluginctl_cmd} -r return_gateways_status | jq -c '.dpinger.[]' | while read gw; do
+  gw_name="$(echo "${gw}" | jq -r '.name')"
+  gw_status="$(echo "${gw}" | jq -r '.status' | sed 's/none/up/g')"
+  log "info" "Gateway status \"${gw_status}\" for \"${gw_name}\""
+
+  if [[ "${gw_status}" == "down" ]]; then
+    echo "${gw}" | sed "s/{/{\"timestamp\":\"$(date +'%F %T')\",/" | jq -c | sed 's/none/up/g' >> ${logfile_path}/check_gw_${gw_name}.jsonl
+  fi
+done
 
