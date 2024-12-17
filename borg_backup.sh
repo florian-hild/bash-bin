@@ -10,12 +10,13 @@
 
 export LANG=C
 
-declare -r __SCRIPT_VERSION__='1.0'
+declare -r __SCRIPT_VERSION__='2.0'
 declare -r BASH_LIB_DIR="/usr/local/bin/bash-lib"
 
 # Defaults:
 # This variables can be overitten in the env file
 declare borg_logfile="${HOME}/local/log/borg_backup_$(hostname -s)_$(date +'%Y-%m').log"
+declare borg_tmp_logfile="/tmp/borg_backup_$(hostname -s)_$(date +'%Y-%m').log"
 declare BORG_EXCLUDE=''
 declare BORG_PREFIX=''
 declare BORG_PRUNE_KEEP_LAST='4'
@@ -23,6 +24,16 @@ declare BORG_PRUNE_KEEP_DAILY='0'
 declare BORG_PRUNE_KEEP_WEEKLY='0'
 declare BORG_PRUNE_KEEP_MONTHLY='3'
 declare BORG_PRUNE_KEEP_YEARLY='3'
+
+# Pre commands
+run_pre(){
+  :;
+}
+
+# Post commands
+run_post(){
+  :;
+}
 
 # Load libraries
 source ${BASH_LIB_DIR}/logger/lib
@@ -203,7 +214,16 @@ if [[ -z "${BORG_DIR_LIST// }" ]]; then
   exit 1
 fi
 
-exec > >(tee -a ${borg_logfile}) 2>&1
+# Define a trap to run when the script exits
+trap '{
+  # Append the content of the log file to the backup file
+  cat "${borg_tmp_logfile}" >> "${borg_logfile}"
+
+  # Remove the original log file
+  rm -f "${borg_tmp_logfile}"
+}' EXIT
+
+exec > >(tee -a ${borg_tmp_logfile}) 2>&1
 
 if [[ -z "${prune// }" ]]; then
   borg_backup
