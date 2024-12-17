@@ -21,9 +21,9 @@ declare BORG_EXCLUDE=''
 declare BORG_PREFIX=''
 declare BORG_PRUNE_KEEP_LAST='4'
 declare BORG_PRUNE_KEEP_DAILY='0'
-declare BORG_PRUNE_KEEP_WEEKLY='0'
-declare BORG_PRUNE_KEEP_MONTHLY='3'
-declare BORG_PRUNE_KEEP_YEARLY='3'
+declare BORG_PRUNE_KEEP_WEEKLY='4'
+declare BORG_PRUNE_KEEP_MONTHLY='6'
+declare BORG_PRUNE_KEEP_YEARLY='2'
 
 # Pre commands
 run_pre(){
