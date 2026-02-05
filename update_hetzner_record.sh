@@ -12,11 +12,13 @@ declare -r BASH_LIB_DIR="/usr/local/bin/bash-lib"
 declare -r logfile_path="${HOME}/local/log"
 
 # Load libraries
+# shellcheck disable=SC1091
 source ${BASH_LIB_DIR}/logger/lib
+# shellcheck disable=SC2034
 declare -r log_no_timestamp="true"
 
-if [[ ! -d ${logfile_path} ]]; then
-  mkdir -p ${logfile_path}
+if [[ ! -d "${logfile_path}" ]]; then
+  mkdir -p "${logfile_path}"
 fi
 
 if [[ -z "${1// }" ]]; then
@@ -25,8 +27,9 @@ if [[ -z "${1// }" ]]; then
   exit 2
 fi
 
-if [[ -r ${1} ]]; then
-  source ${1}
+if [[ -r "${1}" ]]; then
+  # shellcheck disable=SC1090
+  source "${1}"
 else
   log "error" "File \"${1}\" not found or not readable"
   exit 1
@@ -39,27 +42,29 @@ log "info" "Current public ip: \"${current_public_ip}\""
 log "info" "   Last public ip: \"${last_public_ip}\""
 
 if [[ "${current_public_ip}" != "${last_public_ip}" ]]; then
-  printf "{\"timestamp\":\"$(date +'%F %T')\",\"current\":\"${current_public_ip}\",\"last\":\"${last_public_ip}\"}\n" >> ${logfile_path}/update_hetzner_record.jsonl
+  printf "{\"timestamp\":\"$(date +'%F %T')\",\"current\":\"${current_public_ip}\",\"last\":\"${last_public_ip}\"}\n" >> "${logfile_path}"/update_hetzner_record.jsonl
 
 
-  for record in "${record_ids[@]}"; do
-    record_name=$(echo $record|cut -d',' -f1)
-    record_id=$(echo $record|cut -d',' -f2)
+  for record in "${reco"rd_ids["@]}"; do
+    record_name=$(ech"o $reco"rd|cut -d',' -f1)
+    record_id=$(echo "$record"|cut -d',' -f2)
 
-    curl -X "PUT" "https://dns.hetzner.com/api/v1/records/{${record_id}}" \
-      -H 'Content-Type: application/json' \
-      -H "Auth-API-Token: ${api_token}" \
-      -d $'{
-        "value": "'${current_public_ip}'",
-        "ttl": 900,
-        "type": "A",
-        "name": "'${record_name}'",
-        "zone_id": "'${zone_id}'"
-      }'
+  curl 'https://api.hetzner.cloud/v1/zones/${ZONE_NAME}/rrsets/${RECORD_NAME}/A/actions/set_records' \
+    --request POST \
+    --header 'Content-Type: application/json' \
+    --header 'Authorization: Bearer ${HETZNER_API_TOKEN}' \
+    --data '{
+    "records": [
+        {
+        "value": "${current_public_ip}",
+        "comment": "Public ip"
+        }
+    ]
+    }'
   done
 
   # Replace last_public_ip value in env file
-  perl -pi -e "s/^last_public_ip=.*/last_public_ip=\"${current_public_ip}\"/g" ${1}
+  perl -pi -e "s/^last_public_ip=.*/last_public_ip=\"${current_public_ip}\"/g" "${1}"
 fi
 
 exit
